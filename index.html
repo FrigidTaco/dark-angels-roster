@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dark Angels of Caliban - Roster & Armor Tracker</title>
+  <title>Dark Angels of Caliban - Roster & Quest Tracker</title>
   <style>
     :root {
       --caliban-green: #0a2f1d;
@@ -94,11 +94,13 @@
     .rank-badge {
       background-color: var(--caliban-green);
       color: var(--bone-white);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: bold;
       padding: 4px 8px;
       border-radius: 4px;
       text-transform: uppercase;
+      max-width: 45%;
+      text-align: center;
     }
 
     .armor-title {
@@ -116,36 +118,31 @@
     }
 
     .armor-item {
-      display: flex;
-      align-items: center;
       background: #181818;
-      padding: 8px;
+      padding: 6px 8px;
       border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      user-select: none;
-      border: 1px solid transparent;
-      transition: all 0.2s ease;
+      font-size: 0.82rem;
+      border: 1px solid var(--border-color);
     }
 
-    .armor-item.earned {
-      background-color: rgba(10, 47, 29, 0.3);
-      border-color: var(--caliban-green);
+    .armor-label {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-bottom: 3px;
+    }
+
+    .armor-input {
+      width: 100%;
+      background: transparent;
+      border: none;
       color: var(--bone-white);
+      font-size: 0.85rem;
+      padding: 2px 0;
+      outline: none;
     }
-
-    .armor-item.earned .status-dot {
-      background-color: #2ecc71;
-      box-shadow: 0 0 6px #2ecc71;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #555;
-      border-radius: 50%;
-      margin-right: 8px;
-      flex-shrink: 0;
+    .armor-input:focus {
+      border-bottom: 1px solid var(--caliban-green);
     }
 
     .floating-actions {
@@ -189,6 +186,8 @@
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 8px; padding: 24px; width: 100%; max-width: 450px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
     .custom-modal-box h3 { color: var(--bone-white); margin-bottom: 16px; font-size: 1.25rem; }
@@ -209,14 +208,13 @@
 
   <header>
     <h1>Dark Angels of Caliban</h1>
-    <p>Roster & Armor Quest Achievement Tracker</p>
+    <p>Roster & Custom Armor Quest Tracker</p>
   </header>
 
   <input type="text" id="search" class="search-bar" placeholder="Filter battle-brothers by name, rank, or position..." oninput="handleSearch(this.value)">
 
   <div class="roster-grid" id="rosterGrid"></div>
 
-  <!-- Bound the function calls directly to inline onclick triggers so they execute instantly -->
   <div class="floating-actions">
     <button type="button" class="btn" onclick="openModal()">+ Add Brother</button>
     <button type="button" class="btn btn-secondary" onclick="exportData()">Export Data</button>
@@ -232,17 +230,8 @@
       </div>
 
       <div class="input-row">
-        <label>Rank</label>
-        <select id="brotherRank" class="field-box">
-          <option value="Grand Master">Grand Master</option>
-          <option value="Master">Master</option>
-          <option value="Interrogator-Chaplain">Interrogator-Chaplain</option>
-          <option value="Librarian">Librarian</option>
-          <option value="Company Champion">Company Champion</option>
-          <option value="Veteran Brother">Veteran Brother</option>
-          <option value="Battle-Brother" selected>Battle-Brother</option>
-          <option value="Neophyte">Neophyte</option>
-        </select>
+        <label>Rank Selection</label>
+        <select id="brotherRank" class="field-box"></select>
       </div>
 
       <div class="input-row">
@@ -258,30 +247,51 @@
   </div>
 
   <script>
-    // Shifted data structures completely to global availability rules
-    let roster = [
-      {
-        id: 1,
-        name: "Grand Master Azrael",
-        rank: "Grand Master",
-        position: "Supreme Chapter Commander",
-        armor: { Studs: true, Helm: true, Breastplate: true, Pauldrons: true, Backpack: true, Wargear: true, Arms: true, Legs: true }
-      },
-      {
-        id: 2,
-        name: "Brother Asmodai",
-        rank: "Interrogator-Chaplain",
-        position: "Master of Repentance",
-        armor: { Studs: false, Helm: true, Breastplate: true, Pauldrons: true, Backpack: false, Wargear: true, Arms: true, Legs: true }
-      }
+    // Strict priority hierarchy ranking table for sorting from top to bottom
+    const rankOrder = [
+      "Primarch", "Supreme Grand Master", "Hound of Caliban", "Finder of Secrets", 
+      "Master of Interrogation", "Chief Librarian", "Master of the Rock", "Interrogator Chaplain", 
+      "Senior Chaplain", "Chaplain", "Judiciar", "Epistolary", "Lexicanum", "Chief Apothecary", 
+      "Helix Adept", "Techmarine", "Tech Adept", "Company Master", "Honor Guard", "Lieutenant", 
+      "Veteran Sergeant", "Sergeant", "Company Ancient", "Company Champion", "BladeGuard Veteran", 
+      "Deathwing Knight", "Black Knight", "Veteran", "Battle Brother", "Scout", "Neophyte"
     ];
 
     const armorCategories = ["Studs", "Helm", "Breastplate", "Pauldrons", "Backpack", "Wargear", "Arms", "Legs"];
+
+    let roster = [
+      {
+        id: 1,
+        name: "Lion El'Jonson",
+        rank: "Primarch",
+        position: "The First, Lord of Caliban",
+        armor: { Studs: "Golden Studs", Helm: "Leonine Helm", Breastplate: "Armor of El'Jonson", Pauldrons: "Imperial Pauldrons", Backpack: "Custom Jump Pack", Wargear: "The Fealty Blade", Arms: "Vanguard Vambraces", Legs: "Greaves of Caliban" }
+      },
+      {
+        id: 2,
+        name: "Azrael",
+        rank: "Supreme Grand Master",
+        position: "Keeper of the Truth",
+        armor: { Studs: "Service Studs", Helm: "Lion Helm", Breastplate: "Wrathful Plate", Pauldrons: "Master Pauldrons", Backpack: "Protector Pack", Wargear: "Sword of Secrets", Arms: "Artificer Arms", Legs: "Artificer Legs" }
+      }
+    ];
 
     if (localStorage.getItem('da_roster_data')) {
       try {
         roster = JSON.parse(localStorage.getItem('da_roster_data'));
       } catch(e) { console.error(e); }
+    }
+
+    // Populate rank dropdown list
+    const rankSelect = document.getElementById('brotherRank');
+    if (rankSelect) {
+      rankOrder.forEach(rank => {
+        const opt = document.createElement('option');
+        opt.value = rank;
+        opt.textContent = rank;
+        if(rank === "Battle Brother") opt.selected = true;
+        rankSelect.appendChild(opt);
+      });
     }
 
     function saveToStorage() {
@@ -300,92 +310,26 @@
       renderRoster(val);
     }
 
+    function updateArmorValue(memberId, category, textVal) {
+      const idx = roster.findIndex(m => m.id === memberId);
+      if (idx !== -1) {
+        roster[idx].armor[category] = textVal;
+        saveToStorage();
+      }
+    }
+
     function renderRoster(filterText = '') {
       const grid = document.getElementById('rosterGrid');
       if (!grid) return;
       grid.innerHTML = '';
 
-      const filtered = roster.filter(m => 
-        m.name.toLowerCase().includes(filterText.toLowerCase()) ||
-        m.rank.toLowerCase().includes(filterText.toLowerCase()) ||
-        m.position.toLowerCase().includes(filterText.toLowerCase())
-      );
+      // Hierarchy sorting step
+      let sortedRoster = [...roster].sort((a, b) => {
+        let indexA = rankOrder.indexOf(a.rank);
+        let indexB = rankOrder.indexOf(b.rank);
+        if (indexA === -1) indexA = 999;
+        if (indexB === -1) indexB = 999;
+        return indexA - indexB;
+      });
 
-      filtered.forEach(member => {
-        const card = document.createElement('div');
-        card.className = 'member-card';
-
-        const header = document.createElement('div');
-        header.className = 'member-header';
-        
-        const info = document.createElement('div');
-        info.className = 'member-info';
-        info.innerHTML = `<h2>${member.name}</h2><p>${member.position}</p>`;
-        
-        const badge = document.createElement('span');
-        badge.className = 'rank-badge';
-        badge.innerText = member.rank;
-
-        header.appendChild(info);
-        header.appendChild(badge);
-        card.appendChild(header);
-
-        const armorTitle = document.createElement('div');
-        armorTitle.className = 'armor-title';
-        armorTitle.innerText = "Earned Armor Pieces";
-        card.appendChild(armorTitle);
-
-        const list = document.createElement('div');
-      if (localStorage.getItem('da_roster_data')) {
-        try {
-          roster = JSON.parse(localStorage.getItem('da_roster_data'));
-        } catch(e) { console.error(e); }
-      }
-
-      function saveToStorage() {
-        localStorage.setItem('da_roster_data', JSON.stringify(roster));
-      }
-
-      function renderRoster(filterText = '') {
-        const grid = document.getElementById('rosterGrid');
-        if (!grid) return;
-        grid.innerHTML = '';
-
-        const filtered = roster.filter(m => 
-          m.name.toLowerCase().includes(filterText.toLowerCase()) ||
-          m.rank.toLowerCase().includes(filterText.toLowerCase()) ||
-          m.position.toLowerCase().includes(filterText.toLowerCase())
-        );
-
-        filtered.forEach(member => {
-          const card = document.createElement('div');
-          card.className = 'member-card';
-
-          const header = document.createElement('div');
-          header.className = 'member-header';
-          
-          const info = document.createElement('div');
-          info.className = 'member-info';
-          info.innerHTML = `<h2>${member.name}</h2><p>${member.position}</p>`;
-          
-          const badge = document.createElement('span');
-          badge.className = 'rank-badge';
-          badge.innerText = member.rank;
-
-          header.appendChild(info);
-          header.appendChild(badge);
-          card.appendChild(header);
-
-          const armorTitle = document.createElement('div');
-          armorTitle.className = 'armor-title';
-          armorTitle.innerText = "Earned Armor Pieces";
-          card.appendChild(armorTitle);
-
-          const list = document.createElement('div');
-          list.className = 'armor-list';
-
-          armorCategories.forEach(cat => {
-            const item = document.createElement('div');
-            const isEarned = member.armor[cat] || false;
-            item.className = `armor-item ${isEarned ? 'earned' : ''}`;
-            item.innerHTML = `<span class="status-dot"></span>${cat}`;
+      const filtered = sortedRoster.filter(m => 
