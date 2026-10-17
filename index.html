@@ -232,7 +232,37 @@
       <div class="input-row">
         <label>Rank Selection</label>
         <select id="brotherRank" class="field-box">
-          <!-- Python script below will insert the 31 ranks here dynamically -->
+          <option value="Primarch">Primarch</option>
+          <option value="Supreme Grand Master">Supreme Grand Master</option>
+          <option value="Hound of Caliban">Hound of Caliban</option>
+          <option value="Finder of Secrets">Finder of Secrets</option>
+          <option value="Master of Interrogation">Master of Interrogation</option>
+          <option value="Chief Librarian">Chief Librarian</option>
+          <option value="Master of the Rock">Master of the Rock</option>
+          <option value="Interrogator Chaplain">Interrogator Chaplain</option>
+          <option value="Senior Chaplain">Senior Chaplain</option>
+          <option value="Chaplain">Chaplain</option>
+          <option value="Judiciar">Judiciar</option>
+          <option value="Epistolary">Epistolary</option>
+          <option value="Lexicanum">Lexicanum</option>
+          <option value="Chief Apothecary">Chief Apothecary</option>
+          <option value="Helix Adept">Helix Adept</option>
+          <option value="Techmarine">Techmarine</option>
+          <option value="Tech Adept">Tech Adept</option>
+          <option value="Company Master">Company Master</option>
+          <option value="Honor Guard">Honor Guard</option>
+          <option value="Lieutenant">Lieutenant</option>
+          <option value="Veteran Sergeant">Veteran Sergeant</option>
+          <option value="Sergeant">Sergeant</option>
+          <option value="Company Ancient">Company Ancient</option>
+          <option value="Company Champion">Company Champion</option>
+          <option value="BladeGuard Veteran">BladeGuard Veteran</option>
+          <option value="Deathwing Knight">Deathwing Knight</option>
+          <option value="Black Knight">Black Knight</option>
+          <option value="Veteran">Veteran</option>
+          <option value="Battle Brother" selected>Battle Brother</option>
+          <option value="Scout">Scout</option>
+          <option value="Neophyte">Neophyte</option>
         </select>
       </div>
 
@@ -248,8 +278,31 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
-</body>
+  <script>
+    const rankOrder = [
+      "Primarch", "Supreme Grand Master", "Hound of Caliban", "Finder of Secrets", 
+      "Master of Interrogation", "Chief Librarian", "Master of the Rock", "Interrogator Chaplain", 
+      "Senior Chaplain", "Chaplain", "Judiciar", "Epistolary", "Lexicanum", "Chief Apothecary", 
+      "Helix Adept", "Techmarine", "Tech Adept", "Company Master", "Honor Guard", "Lieutenant", 
+      "Veteran Sergeant", "Sergeant", "Company Ancient", "Company Champion", "BladeGuard Veteran", 
+      "Deathwing Knight", "Black Knight", "Veteran", "Battle Brother", "Scout", "Neophyte"
+    ];
+
+    const armorCategories = ["Studs", "Helm", "Breastplate", "Pauldrons", "Backpack", "Wargear", "Arms", "Legs"];
+
+    let roster = [
+      {
+        id: 1,
+        name: "Lion El'Jonson",
+        rank: "Primarch",
+        position: "The First, Lord of Caliban",
+        armor: { Studs: "Golden Studs", Helm: "Leonine Helm", Breastplate: "Armor of El'Jonson", Pauldrons: "Imperial Pauldrons", Backpack: "Custom Jump Pack", Wargear: "The Fealty Blade", Arms: "Vanguard Vambraces", Legs: "Greaves of Caliban" }
+      },
+      {
+        id: 2,
+        name: "Azrael",
+        rank: "Supreme Grand Master",
+        position: "Keeper of the Truth",
 </html>
         name: "Azrael",
         rank: "Supreme Grand Master",
