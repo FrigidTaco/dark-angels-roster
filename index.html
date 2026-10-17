@@ -24,16 +24,27 @@
     .roster-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
     @media (min-width: 768px) { .roster-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (min-width: 1200px) { .roster-grid { grid-template-columns: repeat(3, 1fr); } }
-    .member-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+    .member-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); margin-bottom: 10px; }
+    .member-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+    .member-info h2 { font-size: 1.2rem; color: var(--bone-white); }
+    .member-info p { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+    .rank-badge { background-color: var(--caliban-green); color: var(--bone-white); font-size: 0.72rem; font-weight: bold; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; max-width: 50%; text-align: center; }
+    .armor-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }
+    .armor-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .armor-item { background: #181818; padding: 6px 8px; border-radius: 6px; font-size: 0.82rem; border: 1px solid var(--border-color); }
+    .armor-label { display: block; color: var(--text-muted); font-size: 0.75rem; margin-bottom: 3px; }
+    .armor-input { width: 100%; background: transparent; border: none; color: var(--bone-white); font-size: 0.85rem; padding: 2px 0; outline: none; }
     .floating-actions { position: fixed; bottom: 16px; right: 16px; left: 16px; display: flex; gap: 12px; justify-content: center; z-index: 10; }
     .btn { background-color: var(--caliban-green); color: var(--bone-white); border: none; padding: 14px 24px; border-radius: 25px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); flex: 1; max-width: 200px; text-align: center; }
     .btn-secondary { background-color: #333; color: #fff; }
     .custom-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; padding: 16px; z-index: 1000; }
     .custom-modal-box { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; width: 100%; max-width: 450px; max-height: 90vh; overflow-y: auto; }
+    .custom-modal-box h3 { color: var(--bone-white); margin-bottom: 16px; font-size: 1.25rem; }
     .input-row { margin-bottom: 16px; }
     .input-row label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
     .field-box { width: 100%; padding: 12px; background-color: #181818; border: 1px solid var(--border-color); border-radius: 6px; color: #fff; font-size: 1rem; outline: none; }
     .action-row { display: flex; gap: 12px; margin-top: 24px; }
+    .action-row .btn { flex: 1; max-width: none; }
   </style>
 </head>
 <body>
@@ -41,21 +52,37 @@
     <h1>Dark Angels of Caliban</h1>
     <p>Roster & Custom Armor Quest Tracker</p>
   </header>
+
   <input type="text" id="search" class="search-bar" placeholder="Filter battle-brothers by name, rank, or position..." oninput="window.handleSearch(this.value)">
   <div class="roster-grid" id="rosterGrid"></div>
+
   <div class="floating-actions">
     <button type="button" class="btn" onclick="window.openModal()">+ Add Brother</button>
     <button type="button" class="btn btn-secondary" onclick="window.exportData()">Export Data</button>
   </div>
+
   <div class="custom-modal-overlay" id="brotherModal">
     <div class="custom-modal-box">
       <h3>Induct New Battle-Brother</h3>
-      <div class="input-row"><label>Name</label><input type="text" id="brotherName" class="field-box" placeholder="e.g., Brother Balthasar"></div>
-      <div class="input-row"><label>Rank Selection</label><select id="brotherRank" class="field-box"><option value="Battle Brother" selected>Battle Brother</option></select></div>
-      <div class="input-row"><label>Position / Role</label><input type="text" id="brotherPosition" class="field-box" placeholder="e.g., 3rd Company"></div>
-      <div class="action-row"><button type="button" class="btn btn-secondary" onclick="window.closeModal()">Cancel</button><button type="button" class="btn" onclick="window.addMember()">Add to Roster</button></div>
+      <div class="input-row">
+        <label>Name</label>
+        <input type="text" id="brotherName" class="field-box" placeholder="e.g., Brother Balthasar">
+      </div>
+      <div class="input-row">
+        <label>Rank Selection</label>
+        <select id="brotherRank" class="field-box"></select>
+      </div>
+      <div class="input-row">
+        <label>Position / Role</label>
+        <input type="text" id="brotherPosition" class="field-box" placeholder="e.g., 3rd Company, Tactical Squad Lead">
+      </div>
+      <div class="action-row">
+        <button type="button" class="btn btn-secondary" onclick="window.closeModal()">Cancel</button>
+        <button type="button" class="btn" onclick="window.addMember()">Add to Roster</button>
+      </div>
     </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
