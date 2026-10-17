@@ -276,9 +276,7 @@
         <button type="button" class="btn" onclick="window.addMember()">Add to Roster</button>
       </div>
     </div>
-  </div>
-
-  <script>
+  </div><script>
     const rankOrder = [
       "Primarch", "Supreme Grand Master", "Hound of Caliban", "Finder of Secrets", 
       "Master of Interrogation", "Chief Librarian", "Master of the Rock", "Interrogator Chaplain", 
@@ -303,7 +301,148 @@
         name: "Azrael",
         rank: "Supreme Grand Master",
         position: "Keeper of the Truth",
+        armor: { Studs: "Service Studs", Helm: "Lion Helm", Breastplate: "Wrathful Plate", Pauldrons: "Master Pauldrons", Backpack: "Protector Pack", Wargear: "Sword of Secrets", Arms: "Artificer Arms", Legs: "Artificer Legs" }
+      }
+    ];
+
+    if (localStorage.getItem('da_roster_data')) {
+      try {
+        roster = JSON.parse(localStorage.getItem('da_roster_data'));
+      } catch(e) { console.error(e); }
+    }
+
+    window.openModal = function() {
+      document.getElementById('brotherModal').style.display = 'flex';
+    };
+
+    window.closeModal = function() {
+      document.getElementById('brotherModal').style.display = 'none';
+    };
+
+    window.handleSearch = function(val) {
+      window.renderRoster(val);
+    };
+
+    window.updateArmorValue = function(memberId, category, textVal) {
+      const idx = roster.findIndex(m => m.id === memberId);
+      if (idx !== -1) {
+        roster[idx].armor[category] = textVal;
+        localStorage.setItem('da_roster_data', JSON.stringify(roster));
+      }
+    };
+
+    window.addMember = function() {
+      const nameField = document.getElementById('brotherName');
+      const rankField = document.getElementById('brotherRank');
+      const posField = document.getElementById('brotherPosition');
+
+      const name = nameField ? nameField.value.trim() : '';
+      const rank = rankField ? rankField.value : 'Battle Brother';
+      const position = (posField && posField.value.trim()) ? posField.value.trim() : 'Unassigned';
+
+      if (!name) {
+        alert("Please enter a name for the battle-brother.");
+        return;
+      }
+
+      const emptyArmor = {};
+      armorCategories.forEach(cat => { emptyArmor[cat] = ''; });
+
+      roster.push({
+        id: Date.now(),
+        name: name,
+        rank: rank,
+        position: position,
+        armor: emptyArmor
+      });
+      
+      localStorage.setItem('da_roster_data', JSON.stringify(roster));
+      
+      const searchInput = document.getElementById('search');
+      window.renderRoster(searchInput ? searchInput.value : '');
+      
+      if(nameField) nameField.value = '';
+      if(posField) posField.value = '';
+      window.closeModal();
+    };
+
+    window.exportData = function() {
+      const dataStr = JSON.stringify(roster, null, 2);
+      navigator.clipboard.writeText(dataStr).then(function() {
+        alert("Roster data copied to clipboard!");
+      }).catch(function(err) {
+        alert("Failed to copy data: " + err);
+      });
+    };
+
+    window.renderRoster = function(filterText = '') {
+      const grid = document.getElementById('rosterGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      let sortedRoster = [...roster].sort((a, b) => {
+        let indexA = rankOrder.indexOf(a.rank);
+        let indexB = rankOrder.indexOf(b.rank);
+        if (indexA === -1) indexA = 999;
+        if (indexB === -1) indexB = 999;
+        return indexA - indexB;
+      });
+
+      const filtered = sortedRoster.filter(m => 
+        m.name.toLowerCase().includes(filterText.toLowerCase()) ||
+        m.rank.toLowerCase().includes(filterText.toLowerCase()) ||
+        m.position.toLowerCase().includes(filterText.toLowerCase())
+      );
+
+      filtered.forEach(member => {
+        const card = document.createElement('div');
+        card.className = 'member-card';
+
+        const header = document.createElement('div');
+        header.className = 'member-header';
+        
+        const info = document.createElement('div');
+        info.className = 'member-info';
+        info.innerHTML = `<h2>${member.name}</h2><p>${member.position}</p>`;
+        
+        const badge = document.createElement('span');
+        badge.className = 'rank-badge';
+        badge.innerText = member.rank;
+
+        header.appendChild(info);
+        header.appendChild(badge);
+        card.appendChild(header);
+
+        const armorTitle = document.createElement('div');
+        armorTitle.className = 'armor-title';
+        armorTitle.innerText = "Custom Earned Armor Details";
+        card.appendChild(armorTitle);
+
+        const list = document.createElement('div');
+        list.className = 'armor-list';
+
+        armorCategories.forEach(cat => {
+          const item = document.createElement('div');
+          item.className = 'armor-item';
+          
+          const currentText = member.armor[cat] || '';
+          
+          item.innerHTML = `
+            <label class="armor-label">${cat}</label>
+            <input type="text" class="armor-input" value="${currentText.replace(/"/g, '&quot;')}" placeholder="None..." onchange="window.updateArmorValue(${member.id}, '${cat}', this.value)">
+          `;
+
+          list.appendChild(item);
+        });
+
+        card.appendChild(list);
+        grid.appendChild(card);
+      });
+    };
+
+    window.renderRoster();
+  </script>
+</body>
 </html>
-        name: "Azrael",
         rank: "Supreme Grand Master",
         position: "Keeper of the Truth",
